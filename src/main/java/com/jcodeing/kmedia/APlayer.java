@@ -148,11 +148,18 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
       // =========@reset@=========
       reset();
       // =========@source prepare@=========
-      internalPlayer.setDataSource(uri.toString());
+      String mediaUriPath = uri.toString();
+      boolean onlyCanUseUri = mediaUriPath.startsWith("android.resource");
+      if (onlyCanUseUri) {
+        internalPlayer.setDataSource(context, uri);
+      }
+      else{
+        internalPlayer.setDataSource(mediaUriPath);
+      }
       internalPlayer.prepareAsync();
 
       // =========@Default@========= ???用uri作id???
-      currentMediaId = uri.toString();
+      currentMediaId = mediaUriPath;
 
       // =========@Other@=========
       // to hold a Wifi lock,
