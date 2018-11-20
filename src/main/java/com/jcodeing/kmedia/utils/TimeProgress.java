@@ -81,10 +81,15 @@ public class TimeProgress {
    * 将当前播放媒体资源的时间位置转化为进度条的位置
    */
   public static int progressValue(long curPlayPosition, long mediaDuration, int progressMax) {
-    return curPlayPosition <= 0 ? 0 : (int) ((curPlayPosition * progressMax) / mediaDuration);
+      //modified by fee 2018-11-20 mediaDuration有为0而导致报除0异常
+      if (curPlayPosition <= 0 || mediaDuration <=0) {
+          return 0;
+      }
+      return (int) ((curPlayPosition * progressMax) / mediaDuration);
   }
 
   /**
+   * 将当前播放的进度条位置转换为当前播放的时间位置
    * @return position [duration <= 0 ? 0 : ((duration * progress) / progressMax)]
    */
   public static long positionValue(int progress, long duration, int progressMax) {
