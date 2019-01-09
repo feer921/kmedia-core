@@ -417,7 +417,7 @@ public class MediaQueue implements IMediaQueue {
     if (listeners != null) {
       boolean was_handled = false;
       for (Listener listener : listeners) {
-        if (listener.onSkipQueueIndex(index)) {
+        if (listener.onSkipQueueIndex(index)) {//这样是为了让所有的listener都有机会处理该事件
           was_handled = true;
         }
       }
