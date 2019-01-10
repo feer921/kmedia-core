@@ -466,11 +466,11 @@ public class ControlLayerView extends AControlLayerView {
   }
 
   // ============================@T/B/L/R/M Visibility@============================
-  private View topView;
-  private View bottomView;
-  private View leftView;
-  private View rightView;
-  private View middleView;
+  protected View topView;
+  protected View bottomView;
+  protected View leftView;
+  protected View rightView;
+  protected View middleView;
 
   @Override
   public void setVisibilityByInteractionArea(int visibility, boolean animation) {
