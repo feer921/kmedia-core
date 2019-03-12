@@ -45,7 +45,7 @@ import com.jcodeing.kmedia.assist.C;
  * </ul>
  */
 public interface IPlayerBase {
-
+  String EMPTY_MEDIA_PATH = "null.mp3";
   // ============================@Control
   boolean start();
 
