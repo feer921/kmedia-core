@@ -99,7 +99,7 @@ public class WorkStatePlayer extends APlayer<WorkStatePlayer>{
     }
 
     public boolean play(String mediaFilePath, int loopTime) {
-        if (!Assert.isEmpty(mediaFilePath)) {
+        if (Assert.isEmpty(mediaFilePath)) {
             return false;
         }
         if (loopTime < -1) {

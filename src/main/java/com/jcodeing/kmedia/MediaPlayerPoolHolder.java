@@ -2,6 +2,7 @@ package com.jcodeing.kmedia;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.util.Log;
 
 import com.jcodeing.kmedia.utils.Assert;
 
@@ -79,7 +80,9 @@ public class MediaPlayerPoolHolder {
                 }
             }
             if (willPlayPlayer != null) {
-                return willPlayPlayer.play(mediaFilePath, loopTime);
+                boolean playSuc = willPlayPlayer.play(mediaFilePath, loopTime);
+                Log.i(TAG, "--> play() " + willPlayPlayer + " playSuc=" + playSuc);
+                return playSuc;
             }
         }
         return false;
