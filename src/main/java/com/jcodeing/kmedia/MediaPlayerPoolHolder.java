@@ -28,7 +28,7 @@ public class MediaPlayerPoolHolder {
     private CopyOnWriteArrayList<WorkStatePlayer> playerPool;
 
     private PlayerListener outSideListener;
-
+    private boolean isDebug = false;
     public MediaPlayerPoolHolder withMediaStreamType(int mediaStreamType) {
         this.theStreamType = mediaStreamType;
         return this;
@@ -43,6 +43,11 @@ public class MediaPlayerPoolHolder {
         if (context != null) {
             this.context = context.getApplicationContext();
         }
+        return this;
+    }
+
+    public MediaPlayerPoolHolder withDebugEable(boolean enableDebug) {
+        this.isDebug = enableDebug;
         return this;
     }
     /**
@@ -79,11 +84,11 @@ public class MediaPlayerPoolHolder {
                     willPlayPlayer.setPlayerFlag("Player[" + playerPool.size() + "]");
                 }
             }
-            if (willPlayPlayer != null) {
-                boolean playSuc = willPlayPlayer.play(mediaFilePath, loopTime);
+            boolean playSuc = willPlayPlayer.play(mediaFilePath, loopTime);
+            if (isDebug) {
                 Log.i(TAG, "--> play() " + willPlayPlayer + " playSuc=" + playSuc);
-                return playSuc;
             }
+            return playSuc;
         }
         return false;
     }
@@ -98,6 +103,7 @@ public class MediaPlayerPoolHolder {
             aPlayer.addListener(outSideListener);
         }
         aPlayer.init(mediaPlayer);
+        aPlayer.setDebug(isDebug);
         return aPlayer;
     }
     /**
@@ -120,6 +126,9 @@ public class MediaPlayerPoolHolder {
                         theWillPlayPlayer = workStatePlayer;
                         break;
                     }
+                }
+                if (isDebug) {
+                    Log.i(TAG, "-->findFreePlayerOrSamePlayer() the same player: " + theWillPlayPlayer);
                 }
                 if (theWillPlayPlayer == null) {//没有找到正在播放相同媒体资源的播放器
                     for (WorkStatePlayer workStatePlayer : playerPool) {//则去找是否有空闲的播放器

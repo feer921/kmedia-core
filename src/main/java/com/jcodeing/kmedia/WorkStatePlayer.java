@@ -3,7 +3,6 @@ package com.jcodeing.kmedia;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-
 import com.jcodeing.kmedia.definition.PlayException;
 import com.jcodeing.kmedia.utils.Assert;
 
@@ -43,6 +42,7 @@ public class WorkStatePlayer extends APlayer<WorkStatePlayer>{
      */
     private volatile boolean isWorking = false;
 
+    private boolean isDebug = false;
 
     @Override
     public void onStateChanged(int playbackState) {
@@ -59,17 +59,23 @@ public class WorkStatePlayer extends APlayer<WorkStatePlayer>{
         exception.setErrWhat(what);
         exception.setThePlayMediaFilePath(curPlayMediaPath);
         exception.setExtraInfo(PLAYER_FLAG);
+        if (isDebug) {
+            Log.e(TAG, "-->onError() " + exception);
+        }
         return isErrorDueToEmptyMediaFile | super.onError(what, extra, exception);//如果这里return true,则不会调用onCompletion()
     }
 
     @Override
     public int onCompletion() {
-        Log.i(TAG, "-->onCompletion() " + this);
+        if (isDebug) {
+            Log.i(TAG, "-->onCompletion() " + this);
+        }
         if (curLoopTime == 0) {//播放完了一个有效音频并且只需要播放一次的时候，为了避免当界而从后台再恢复到前台后又自动播放，
             //则这里直接让播放一个空音频来冲掉原来的音频资源
             play(EMPTY_MEDIA_PATH, 0);
         }
         else{
+            isWorking = true;
             if (curLoopTime > 0) {
                 curLoopTime--;
             }
@@ -125,4 +131,7 @@ public class WorkStatePlayer extends APlayer<WorkStatePlayer>{
                 '}';
     }
 
+    public void setDebug(boolean debugEnable) {
+        isDebug = debugEnable;
+    }
 }

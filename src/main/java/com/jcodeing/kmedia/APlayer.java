@@ -1450,7 +1450,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
                     break;
             }
             boolean isListenerHandledFocusChange = APlayer.this.onAudioFocusChange(focusChange);
-            Log.i(TAG, PLAYER_FLAG == null ? "" : PLAYER_FLAG + " --> onAudioFocusChange. focusChange(" + focusChange + ")" + "  audioFocusChangeDesc = " + audioFocusChangeDesc
+            L.i(TAG, PLAYER_FLAG == null ? "" : PLAYER_FLAG + " --> onAudioFocusChange. focusChange(" + focusChange + ")" + "  audioFocusChangeDesc = " + audioFocusChangeDesc
                     + " isListenerHandledFocusChange =" + isListenerHandledFocusChange
             );
             if (!isListenerHandledFocusChange) {//这里表示播放器的监听者(们)都不处理的情况下，本类默认处理
