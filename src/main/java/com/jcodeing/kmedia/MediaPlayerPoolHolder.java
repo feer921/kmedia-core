@@ -77,18 +77,19 @@ public class MediaPlayerPoolHolder {
      * @param mediaFilePath 要播放的媒体文件
      * @param loopTime 播放完成后要循环的次数 0不循环; -1:无限循环
      * @param providedMediaPlayer 外部提供实现的播放器
-     * @return true:准备播放; false:未执行
+     * @return WorkStatePlayer 将播放的播放器
      */
-    public boolean play(String mediaFilePath, int loopTime, IMediaPlayer providedMediaPlayer) {
+    public WorkStatePlayer play(String mediaFilePath, int loopTime, IMediaPlayer providedMediaPlayer) {
         boolean isEmptyMedia = WorkStatePlayer.EMPTY_MEDIA_PATH.equals(mediaFilePath);
         if (isEmptyMedia) {
             if (playerPool == null) {
-                return false;
+                return null;
             }
         }
         if (!Assert.isEmpty(mediaFilePath)) {
             if (isEmptyMedia) {
-                return stopAllWithEmptyMediaFile(mediaFilePath);
+                stopAllWithEmptyMediaFile(mediaFilePath);
+                return null;
             }
             //去播放
             WorkStatePlayer willPlayPlayer = null;
@@ -117,9 +118,9 @@ public class MediaPlayerPoolHolder {
             if (isDebug) {
                 Log.i(TAG, "--> play() " + willPlayPlayer + " playSuc=" + playSuc);
             }
-            return playSuc;
+            return willPlayPlayer;
         }
-        return false;
+        return null;
     }
 
     public WorkStatePlayer gainAPlayer(IMediaPlayer mediaPlayer) {
@@ -140,9 +141,9 @@ public class MediaPlayerPoolHolder {
      * 使用播放器池里的一个播放器来播放媒体资源
      * @param mediaFilePath 要播放的媒体文件
      * @param loopTime 播放完成后要循环的次数 0不循环; -1:无限循环
-     * @return true:准备播放; false:未执行
+     * @return WorkStatePlayer: 将播放的播放器
      */
-    public boolean play(String mediaFilePath, int loopTime) {
+    public WorkStatePlayer play(String mediaFilePath, int loopTime) {
         return play(mediaFilePath, loopTime, null);
     }
 
