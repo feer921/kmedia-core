@@ -59,6 +59,10 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
     // ============================@Assist@============================
     protected final String TAG = getClass().getSimpleName();
     /**
+     * 记录播放器的工作流
+     */
+    protected volatile int theWorkFlow = WORK_FLOW_NONE;
+    /**
      * 播放器的特殊标识
      */
     protected String PLAYER_FLAG = null;
@@ -212,8 +216,16 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
         return prepareMediaId(mediaId, false);
     }
 
+    /**
+     * 该方法表示继续播放
+     * @return
+     */
     @Override
     public boolean play() {
+        if (theWorkFlow == WORK_FLOW_PAUSED_ACTIVE) {
+            return false;
+        }
+        theWorkFlow = WORK_FLOW_PLAY_AUTO;
         //AB Enabled
         if (abEnabled = abStartPosition >= 0) {
             isInAB = false;
@@ -344,6 +356,9 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
 
     @Override
     public boolean pause() {
+        if (theWorkFlow != WORK_FLOW_PAUSED_ACTIVE) {
+            theWorkFlow = WORK_FLOW_PAUSED_AUTO;
+        }
         shouldAutoPlayWhenSeekComplete = false;
         try {
             //interrupt update...
@@ -357,6 +372,44 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
             L.printStackTrace(e);
         }
         return false;
+    }
+
+    /**
+     * 暂停(是否主动暂停)
+     *
+     * @param isActive 是否用户主动暂停
+     * @return true: opt ok; false: opt not
+     */
+    @Override
+    public boolean pause(boolean isActive) {
+        if (isActive) {
+            theWorkFlow = WORK_FLOW_PAUSED_ACTIVE;
+        }
+        else{
+            if (theWorkFlow != WORK_FLOW_PAUSED_ACTIVE) {
+                theWorkFlow = WORK_FLOW_PAUSED_AUTO;
+            }
+        }
+        return pause();
+    }
+
+    /**
+     * 播放(是否主动播放)
+     *
+     * @param isActive 是否用户主动播放(继续播放)
+     * @return true: opt ok; false: opt not
+     */
+    @Override
+    public boolean play(boolean isActive) {
+        if (isActive) {
+            theWorkFlow = WORK_FLOW_PLAY_ACTIVE;
+            return play();
+        }
+        if (theWorkFlow == WORK_FLOW_PAUSED_ACTIVE) {//主动暂停了的情况下，不能继续播放
+            return false;
+        }
+        theWorkFlow = WORK_FLOW_PLAY_AUTO;
+        return play();
     }
 
     /**
@@ -568,7 +621,11 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
     @Override
     public void onPrepared() {
         if (shouldAutoPlayWhenPrepared) {
-            start();
+            //added by fee 2019-03-14:如果prepared 在 pause()之后，此时不应该再播放了
+            if (theWorkFlow != WORK_FLOW_PAUSED_ACTIVE && theWorkFlow != WORK_FLOW_PAUSED_AUTO) {
+                theWorkFlow = WORK_FLOW_PREPARED;
+                start();
+            }
         }
         for (Listener listener : listeners) {
             listener.onPrepared();
@@ -577,6 +634,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
 
     @Override
     public void onBufferingUpdate(int percent) {
+        theWorkFlow = WORK_FLOW_BUFFERING;
         for (Listener listener : listeners) {
             listener.onBufferingUpdate(percent);
         }

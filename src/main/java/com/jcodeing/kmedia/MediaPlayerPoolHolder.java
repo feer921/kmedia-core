@@ -29,6 +29,18 @@ public class MediaPlayerPoolHolder {
 
     private PlayerListener outSideListener;
     private boolean isDebug = false;
+    /**
+     * 播放器池是否为多播放器模式
+     * def: true;
+     */
+    private boolean isPoolMultiPlayerMode = true;
+
+    /**
+     * 播放器中的播放器是否在播放完成后自动播放空媒体
+     * def:true
+     */
+    private boolean isThePlayerAutoPlayEmptyMediaWhenOver = true;
+
     public MediaPlayerPoolHolder withMediaStreamType(int mediaStreamType) {
         this.theStreamType = mediaStreamType;
         return this;
@@ -50,6 +62,16 @@ public class MediaPlayerPoolHolder {
         this.isDebug = enableDebug;
         return this;
     }
+
+    public MediaPlayerPoolHolder withPoolMultiPlayerMode(boolean isPoolMultiPlayerMode) {
+        this.isPoolMultiPlayerMode = isPoolMultiPlayerMode;
+        return this;
+    }
+
+    public MediaPlayerPoolHolder withPlayerAutoPlayEmptyMedia(boolean isAutoPlayEmptyMedia) {
+        this.isThePlayerAutoPlayEmptyMediaWhenOver = isAutoPlayEmptyMedia;
+        return this;
+    }
     /**
      * 使用播放器池里的一个播放器来播放媒体资源
      * @param mediaFilePath 要播放的媒体文件
@@ -69,7 +91,7 @@ public class MediaPlayerPoolHolder {
                 return stopAllWithEmptyMediaFile(mediaFilePath);
             }
             //去播放
-            WorkStatePlayer willPlayPlayer;
+            WorkStatePlayer willPlayPlayer = null;
             if (playerPool == null) {
                 playerPool = new CopyOnWriteArrayList<>();
                 willPlayPlayer = gainAPlayer(providedMediaPlayer);
@@ -77,7 +99,14 @@ public class MediaPlayerPoolHolder {
                 playerPool.add(willPlayPlayer);
             }
             else{//播放池不为空
-                willPlayPlayer = findFreePlayerOrSamePlayer(mediaFilePath);
+                if (!isPoolMultiPlayerMode) {//如果当前播放器池不是多播放器模式
+                    if (!playerPool.isEmpty()) {
+                        willPlayPlayer = playerPool.get(0);
+                    }
+                }
+                if (willPlayPlayer == null) {//这里还是留一手，就算当前播放池不是多播放器模式下，如果上面找到的播放器为空也再去获取一个
+                    willPlayPlayer = findFreePlayerOrSamePlayer(mediaFilePath);
+                }
                 if (willPlayPlayer == null) {//没有找到播放器也没有空闲的播放器
                     willPlayPlayer = gainAPlayer(providedMediaPlayer);
                     playerPool.add(willPlayPlayer);
@@ -93,7 +122,7 @@ public class MediaPlayerPoolHolder {
         return false;
     }
 
-    private WorkStatePlayer gainAPlayer(IMediaPlayer mediaPlayer) {
+    public WorkStatePlayer gainAPlayer(IMediaPlayer mediaPlayer) {
         if (mediaPlayer == null) {
             mediaPlayer = defProvideMediaPlayer();
         }
@@ -104,6 +133,7 @@ public class MediaPlayerPoolHolder {
         }
         aPlayer.init(mediaPlayer);
         aPlayer.setDebug(isDebug);
+        aPlayer.setAutoPlayEmptyMediaWhenOver(isThePlayerAutoPlayEmptyMediaWhenOver);
         return aPlayer;
     }
     /**
@@ -115,6 +145,12 @@ public class MediaPlayerPoolHolder {
     public boolean play(String mediaFilePath, int loopTime) {
         return play(mediaFilePath, loopTime, null);
     }
+
+    /**
+     * 去播放器池中查找正在播放相同音频资源的播放器，如果找不到继续查找空闲的播放器
+     * @param toPlayMediaFilePath 准备要被播放的资源
+     * @return null if no;
+     */
     public WorkStatePlayer findFreePlayerOrSamePlayer(String toPlayMediaFilePath) {
         if (playerPool != null) {
             WorkStatePlayer theWillPlayPlayer = null;
@@ -122,14 +158,13 @@ public class MediaPlayerPoolHolder {
                 //先找播放相同媒体文件的播放器
                 for (WorkStatePlayer workStatePlayer : playerPool) {
                     String thePlayFilePath = workStatePlayer.getCurPlayMediaPath();
+                    log(TAG, "-->findFreePlayerOrSamePlayer() thePlayFilePath = " + thePlayFilePath + " toPlayMediaFilePath = " + toPlayMediaFilePath);
                     if (toPlayMediaFilePath.equals(thePlayFilePath)) {
                         theWillPlayPlayer = workStatePlayer;
                         break;
                     }
                 }
-                if (isDebug) {
-                    Log.i(TAG, "-->findFreePlayerOrSamePlayer() the same player: " + theWillPlayPlayer);
-                }
+                log(TAG, "-->findFreePlayerOrSamePlayer() the same player: " + theWillPlayPlayer);
                 if (theWillPlayPlayer == null) {//没有找到正在播放相同媒体资源的播放器
                     for (WorkStatePlayer workStatePlayer : playerPool) {//则去找是否有空闲的播放器
                         if (!workStatePlayer.isWorking()) {
@@ -144,7 +179,14 @@ public class MediaPlayerPoolHolder {
         return null;
     }
 
-
+    public WorkStatePlayer findCurWorkingPlayer() {
+        if (!isPoolMultiPlayerMode) {
+            if (playerPool != null && !playerPool.isEmpty()) {
+                return playerPool.get(0);
+            }
+        }
+        return null;
+    }
     public void release() {
         //1、先全部释放播放器池中的播放器
         letPlayerPoolDo(OPT_RELEASE);
@@ -186,6 +228,9 @@ public class MediaPlayerPoolHolder {
         return letPlayerPoolDo(OPT_PAUSE);
     }
 
+    public boolean pause(boolean isActive) {
+        return letPlayerPoolDo(isActive ? OPT_PAUSE_ACTIVE : OPT_PAUSE);
+    }
     /**
      * 恢复播放
      * @return
@@ -193,9 +238,13 @@ public class MediaPlayerPoolHolder {
     public boolean resumePlay() {
         return letPlayerPoolDo(OPT_RESUME);
     }
-
+    public boolean resumePlay(boolean isActive) {
+        return letPlayerPoolDo(isActive ? OPT_RESUME_ACTIVE : OPT_RESUME);
+    }
     public static final String OPT_PAUSE = "pause";
+    public static final String OPT_PAUSE_ACTIVE = "pause_active";
     public static final String OPT_RESUME = "resume";
+    public static final String OPT_RESUME_ACTIVE = "resume_active";
     public static final String OPT_STOP = "stop";
     public static final String OPT_RELEASE = "release";
 //    public static final String OPT_PAUSE = "pause";
@@ -207,19 +256,21 @@ public class MediaPlayerPoolHolder {
                 boolean isOptSuc = true;
                 switch (optType) {
                     case OPT_PAUSE:
+                    case OPT_PAUSE_ACTIVE:
                         if (workStatePlayer.isPlaying()) {
-                            isOptSuc = workStatePlayer.pause();
+                            isOptSuc = workStatePlayer.pause(OPT_PAUSE_ACTIVE.equals(optType));
                         }
                         break;
                     case OPT_RESUME:
-                        isOptSuc = workStatePlayer.play();
+                    case OPT_RESUME_ACTIVE:
+                        isOptSuc = workStatePlayer.play(OPT_RESUME_ACTIVE.equals(optType));
                         break;
                     case OPT_STOP:
                         workStatePlayer.stop();
                         break;
                     case OPT_RELEASE:
 //                        workStatePlayer.release();
-                        workStatePlayer.shutdown();
+                        workStatePlayer.shutdown();//该操作已经包含player.stop()操作
                         break;
                     default:
                         isOptSuc = false;
@@ -236,5 +287,11 @@ public class MediaPlayerPoolHolder {
 
     protected IMediaPlayer defProvideMediaPlayer() {
         return new AndroidMediaPlayer();
+    }
+
+    private void log(String tag, String logInfo) {
+        if (isDebug) {
+            Log.i(tag, logInfo);
+        }
     }
 }

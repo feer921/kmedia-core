@@ -37,6 +37,55 @@ import java.util.ArrayList;
  */
 public interface IPlayer<P extends IPlayer> extends IPlayerBase {
     // ============================@Player
+    /**
+     * added by fee 2019-03-13 扩展框架功能
+     * 以下为播放器当前所处在的工作流状态
+     */
+
+    /**
+     * 播放器工作流：none
+     */
+    int WORK_FLOW_NONE = 0xf0;
+
+    /**
+     * 播放器工作流：设置、初始化(加载资源)
+     */
+    int WORK_FLOW_SETTING_INIT = WORK_FLOW_NONE + 1;
+
+    /**
+     * 播放器工作流：正在缓冲
+     */
+    int WORK_FLOW_BUFFERING = WORK_FLOW_SETTING_INIT + 1;
+
+
+    /**
+     * 播放器工作流：已加载准备好
+     */
+    int WORK_FLOW_PREPARED = WORK_FLOW_BUFFERING + 1;
+    /**
+     * 播放器工作流：被主动暂停了;这个状态下，需要用户主动播放(继续播放)
+     */
+    int WORK_FLOW_PAUSED_ACTIVE = WORK_FLOW_PREPARED + 1;
+
+    /**
+     * 播放器工作流：自动暂停
+     */
+    int WORK_FLOW_PAUSED_AUTO = WORK_FLOW_PAUSED_ACTIVE + 1;
+
+    /**
+     * 播放器工作流：主动播放
+     */
+    int WORK_FLOW_PLAY_ACTIVE = WORK_FLOW_PAUSED_AUTO + 1;
+
+    /**
+     * 播放器工作流：自动播放
+     */
+    int WORK_FLOW_PLAY_AUTO = WORK_FLOW_PLAY_ACTIVE + 1;
+
+    /**
+     * 播放器工作流：停止stop
+     */
+    int WORK_FLOW_STOP = WORK_FLOW_PLAY_AUTO + 1;
 
     /**
      * Get a internal mediaPlayer
@@ -60,7 +109,20 @@ public interface IPlayer<P extends IPlayer> extends IPlayerBase {
 
     boolean prepareMediaId(String mediaId);
 
+    /**
+     * 暂停(是否主动暂停)
+     * @param isActive 是否用户主动暂停
+     * @return true: opt ok; false: opt not
+     */
+    boolean pause(boolean isActive);
     boolean play();
+
+    /**
+     * 播放(是否主动播放)
+     * @param isActive 是否用户主动播放(继续播放)
+     * @return true: opt ok; false: opt not
+     */
+    boolean play(boolean isActive);
 
     boolean play(Uri uri);
 

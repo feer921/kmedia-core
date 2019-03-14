@@ -26,6 +26,11 @@ public class WorkStatePlayer extends APlayer<WorkStatePlayer>{
      * 当前播放的媒体资源文件path
      */
     private String curPlayMediaPath = "";
+    /**
+     * 本播放器播放完成后是否自动播放空媒体资源
+     * def:true
+     */
+    private boolean isAutoPlayEmptyMediaWhenOver = true;
 
     public WorkStatePlayer(Context context) {
         super(context);
@@ -72,7 +77,9 @@ public class WorkStatePlayer extends APlayer<WorkStatePlayer>{
         }
         if (curLoopTime == 0) {//播放完了一个有效音频并且只需要播放一次的时候，为了避免当界而从后台再恢复到前台后又自动播放，
             //则这里直接让播放一个空音频来冲掉原来的音频资源
-            play(EMPTY_MEDIA_PATH, 0);
+            if (isAutoPlayEmptyMediaWhenOver) {
+                play(EMPTY_MEDIA_PATH, 0);
+            }
         }
         else{
             isWorking = true;
@@ -133,5 +140,9 @@ public class WorkStatePlayer extends APlayer<WorkStatePlayer>{
 
     public void setDebug(boolean debugEnable) {
         isDebug = debugEnable;
+    }
+
+    public void setAutoPlayEmptyMediaWhenOver(boolean isAutoPlayEmptyMediaWhenOver) {
+        this.isAutoPlayEmptyMediaWhenOver = isAutoPlayEmptyMediaWhenOver;
     }
 }
