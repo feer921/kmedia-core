@@ -36,7 +36,7 @@ public interface IMediaItem extends Serializable{
 
   /**
    * 获取当前媒体资源的来源类型:
-   * @return 当前媒体资源的来源平台类型 1、魅鸟；2、喜马拉雅；3：不告诉你
+   * @return 当前媒体资源的来源平台类型 1、本司；2、喜马拉雅；3：不告诉你
    */
   int getMediaSrcPlatformType();
   /**
