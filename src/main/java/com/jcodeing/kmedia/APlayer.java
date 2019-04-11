@@ -145,6 +145,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
     //IMediaQueue用的是这里来播放
     protected boolean prepare(Uri uri, boolean shouldAutoPlayWhenPrepared) {
         this.shouldAutoPlayWhenPrepared = shouldAutoPlayWhenPrepared;
+        String mediaUriPath = "";
         try {
             if (uri == null || TextUtils.isEmpty(uri.toString()) || internalPlayer == null) {
                 return false;
@@ -154,11 +155,13 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
                 onPrepared();
                 return true;
             }
+            mediaUriPath = uri.toString();
+            //added by fee 2019-04-11: 增加通知播放监听者当前准备播放的媒体资源
+            onWillPlayMediaData(mediaUriPath);
             // =========@reset@=========
             reset();
             // =========@source prepare@=========
             //modified by fee,兼容可以播放app包内音频资源
-            String mediaUriPath = uri.toString();
             boolean onlyCanUseUri = mediaUriPath.startsWith("android.resource");
             if (onlyCanUseUri) {//表示当是播放包内的音频资源时，只能使用uri的方式
                 internalPlayer.setDataSource(context, uri);
@@ -171,6 +174,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
             // =========@Default@========= ???用uri作id???
             currentMediaId = mediaUriPath;
 
+
             // =========@Other@=========
             // to hold a Wifi lock,
             // which prevents the player from
@@ -180,6 +184,9 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
             }
             return true;
         } catch (Exception e) {
+            if (EMPTY_MEDIA_PATH.equals(mediaUriPath)) {
+                onError(0, 0, e);
+            }
             //IO,Illegal...
             L.printStackTrace(e);
         }
@@ -632,6 +639,11 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
         }
     }
 
+    private void onWillPlayMediaData(String theWillPlayMediaPath) {
+        for (Listener listener : listeners) {
+            listener.onWillPlayMediaPath(theWillPlayMediaPath);
+        }
+    }
     @Override
     public void onBufferingUpdate(int percent) {
         theWorkFlow = WORK_FLOW_BUFFERING;

@@ -29,7 +29,10 @@ import com.jcodeing.kmedia.assist.C;
 public class PlayerListener implements IPlayer.Listener {
     protected String TAG = getClass().getSimpleName();
     public boolean LOG_DEBUG = false;
-
+    /**
+     * 由播放器通知将要播放的媒体资源路径
+     */
+    public String thePlayMediaDataPath;
     public PlayerListener() {
         boolean tagIsEmpty = TextUtils.isEmpty(TAG);
         if (tagIsEmpty) {
@@ -105,9 +108,13 @@ public class PlayerListener implements IPlayer.Listener {
         }
     }
 
+    private int printPlayProgressTime = 0;
     public boolean onPlayProgress(long position, long duration) {
         if (LOG_DEBUG) {
-            Log.i(TAG, "-->onPlayProgress() position = " + position + " duration = " + duration);
+            printPlayProgressTime++;
+            if (printPlayProgressTime <= 3) {
+                Log.i(TAG, "-->onPlayProgress() position = " + position + " duration = " + duration);
+            }
         }
         return false;
     }
@@ -142,6 +149,20 @@ public class PlayerListener implements IPlayer.Listener {
             Log.i(TAG, "-->onAudioFocusChange() focusChange = " + focusChange);
         }
         return false;
+    }
+
+    /**
+     * 通知监听者当前将要播放的媒体资源路径
+     *
+     * @param theWillPlayPath 将要播放的媒体资源路径
+     */
+    @Override
+    public void onWillPlayMediaPath(String theWillPlayPath) {
+        this.thePlayMediaDataPath = theWillPlayPath;
+        if (LOG_DEBUG) {
+            printPlayProgressTime = 0;
+            Log.i(TAG, "-->onWillPlayMediaPath() thePlayMediaDataPath = " + thePlayMediaDataPath);
+        }
     }
 
     @Override

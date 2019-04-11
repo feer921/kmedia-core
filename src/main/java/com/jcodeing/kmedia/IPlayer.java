@@ -388,6 +388,9 @@ public interface IPlayer<P extends IPlayer> extends IPlayerBase {
      */
     interface Listener extends IPlayerBase.Listener {
 
+        /**
+         * 当前Listener被增加到集合中的回调
+         */
         void onAdded();//Lifecycle
 
         /**
@@ -453,5 +456,11 @@ public interface IPlayer<P extends IPlayer> extends IPlayerBase {
         void onNotificationRequired(int order);
 
         boolean onAudioFocusChange(int focusChange);
+
+        /**
+         * 通知监听者当前将要播放的媒体资源路径
+         * @param theWillPlayPath 将要播放的媒体资源路径
+         */
+        void onWillPlayMediaPath(String theWillPlayPath);
     }
 }

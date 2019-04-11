@@ -63,14 +63,14 @@ public class AndroidMediaPlayer extends AMediaPlayer implements
     public void setDataSource(String path)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         dataSource = Uri.parse(path);
-        internalPlayer.setDataSource(path);
+        internalPlayer.setDataSource(path);//这里可能会抛异常
         setPlaybackState(STATE_GOT_SOURCE);
     }
 
     @Override
     public void setDataSource(Context context, Uri uri)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        internalPlayer.setDataSource(context, dataSource = uri);
+        internalPlayer.setDataSource(context, dataSource = uri);//这里可能会抛异常
         setPlaybackState(STATE_GOT_SOURCE);
     }
 
@@ -82,7 +82,7 @@ public class AndroidMediaPlayer extends AMediaPlayer implements
     public void setDataSource(Context context, Uri uri, Map<String, String> headers)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH) {
-            internalPlayer.setDataSource(context, dataSource = uri, headers);
+            internalPlayer.setDataSource(context, dataSource = uri, headers);//这里可能会抛异常
         } else {
             setDataSource(context, uri);
         }
@@ -92,7 +92,7 @@ public class AndroidMediaPlayer extends AMediaPlayer implements
     @Override
     public void setDataSource(FileDescriptor fd)
             throws IOException, IllegalArgumentException, IllegalStateException {
-        internalPlayer.setDataSource(fd);
+        internalPlayer.setDataSource(fd);//这里可能会抛异常
         setPlaybackState(STATE_GOT_SOURCE);
     }
 
