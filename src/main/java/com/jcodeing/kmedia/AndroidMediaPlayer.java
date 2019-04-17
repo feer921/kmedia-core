@@ -17,6 +17,7 @@ package com.jcodeing.kmedia;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build.VERSION;
@@ -93,6 +94,20 @@ public class AndroidMediaPlayer extends AMediaPlayer implements
     public void setDataSource(FileDescriptor fd)
             throws IOException, IllegalArgumentException, IllegalStateException {
         internalPlayer.setDataSource(fd);//这里可能会抛异常
+        setPlaybackState(STATE_GOT_SOURCE);
+    }
+
+
+    @RequiresApi(api = VERSION_CODES.N)
+    @Override
+    public void setDataSource(AssetFileDescriptor assetFileDescriptor) throws Exception {
+        internalPlayer.setDataSource(assetFileDescriptor);//这里可能会抛异常
+        setPlaybackState(STATE_GOT_SOURCE);
+    }
+
+    @Override
+    public void setDataSource(FileDescriptor fd, long offset, long length) throws Exception {
+        internalPlayer.setDataSource(fd,offset,length);//这里可能会抛异常
         setPlaybackState(STATE_GOT_SOURCE);
     }
 

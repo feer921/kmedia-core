@@ -20,6 +20,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -156,18 +158,34 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
                 return true;
             }
             mediaUriPath = uri.toString();
+            Log.i(TAG, "-->prepare() mediaUriPath =" + mediaUriPath);
             //added by fee 2019-04-11: 增加通知播放监听者当前准备播放的媒体资源
             onWillPlayMediaData(mediaUriPath);
             // =========@reset@=========
             reset();
             // =========@source prepare@=========
             //modified by fee,兼容可以播放app包内音频资源
-            boolean onlyCanUseUri = mediaUriPath.startsWith("android.resource");
+            boolean onlyCanUseUri = mediaUriPath.startsWith("android.resource") ;
+
             if (onlyCanUseUri) {//表示当是播放包内的音频资源时，只能使用uri的方式
                 internalPlayer.setDataSource(context, uri);
             }
             else {
-                internalPlayer.setDataSource(mediaUriPath);
+                if (mediaUriPath.startsWith("assets/")) {
+                    String assetFileName = mediaUriPath.substring(mediaUriPath.indexOf("/") + 1);
+                    if (context != null) {
+                        AssetManager assetManager = context.getAssets();
+                        if (assetManager != null) {
+                            AssetFileDescriptor afd = assetManager.openFd(assetFileName);
+//                            internalPlayer.setDataSource(afd.getFileDescriptor());//这种方式居然播放不出来
+                            internalPlayer.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+                        }
+                    }
+                }
+                else{
+                    internalPlayer.setDataSource(mediaUriPath);
+                }
+//                internalPlayer.setDataSource(mediaUriPath);
             }
             internalPlayer.prepareAsync();
 
@@ -184,6 +202,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
             }
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             if (EMPTY_MEDIA_PATH.equals(mediaUriPath)) {
                 onError(0, 0, e);
             }

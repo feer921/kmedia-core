@@ -16,9 +16,13 @@
 package com.jcodeing.kmedia;
 
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Map;
@@ -29,155 +33,160 @@ import java.util.Map;
  */
 public interface IMediaPlayer extends IPlayerBase {
 
-  // ============================@Source
-  void setDataSource(String path)
-      throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+    // ============================@Source
+    void setDataSource(String path)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
-  void setDataSource(Context context, Uri uri)
-      throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+    void setDataSource(Context context, Uri uri)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
-  void setDataSource(Context context, Uri uri, Map<String, String> headers)
-      throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+    void setDataSource(Context context, Uri uri, Map<String, String> headers)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
-  void setDataSource(FileDescriptor fd)
-      throws IOException, IllegalArgumentException, IllegalStateException;
+    void setDataSource(FileDescriptor fd)
+            throws IOException, IllegalArgumentException, IllegalStateException;
 
-  Uri getDataSource();
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void setDataSource(AssetFileDescriptor assetFileDescriptor) throws Exception;
 
-  void prepareAsync() throws IllegalStateException;
+    void setDataSource(FileDescriptor fd, long offset, long length)throws Exception ;
 
-  // ============================@Control
-  // [Sync in android.media.MediaPlayer]
-  boolean start() throws IllegalStateException;
+    Uri getDataSource();
 
-  boolean pause() throws IllegalStateException;
+    void prepareAsync() throws IllegalStateException;
 
-  boolean seekTo(long ms) throws IllegalStateException;
+    // ============================@Control
+    // [Sync in android.media.MediaPlayer]
+    boolean start() throws IllegalStateException;
 
-  void stop() throws IllegalStateException;
+    boolean pause() throws IllegalStateException;
 
-  // ============================@Set/Get/Is
-  // [Sync in android.media.MediaPlayer]
-  void setAudioStreamType(int streamtype);
+    boolean seekTo(long ms) throws IllegalStateException;
 
-  void setVolume(float leftVolume, float rightVolume);
+    void stop() throws IllegalStateException;
 
-  void setDisplay(SurfaceHolder sh);
+    // ============================@Set/Get/Is
+    // [Sync in android.media.MediaPlayer]
+    void setAudioStreamType(int streamtype);
 
-  void setSurface(Surface surface);
+    void setVolume(float leftVolume, float rightVolume);
 
-  void setScreenOnWhilePlaying(boolean screenOn);
+    void setDisplay(SurfaceHolder sh);
 
-  void setLooping(boolean looping);
+    void setSurface(Surface surface);
 
-  boolean isLooping();
+    void setScreenOnWhilePlaying(boolean screenOn);
 
-  int getVideoWidth();
+    void setLooping(boolean looping);
 
-  int getVideoHeight();
+    boolean isLooping();
 
-  int getAudioSessionId();
+    int getVideoWidth();
 
-  // ============================@Listener
-  void setListener(Listener listener);
+    int getVideoHeight();
 
-  void setOnPreparedListener(OnPreparedListener listener);
+    int getAudioSessionId();
 
-  void setOnCompletionListener(OnCompletionListener listener);
+    // ============================@Listener
+    void setListener(Listener listener);
 
-  void setOnBufferingUpdateListener(OnBufferingUpdateListener listener);
+    void setOnPreparedListener(OnPreparedListener listener);
 
-  void setOnSeekCompleteListener(OnSeekCompleteListener listener);
+    void setOnCompletionListener(OnCompletionListener listener);
 
-  void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener);
+    void setOnBufferingUpdateListener(OnBufferingUpdateListener listener);
 
-  void setOnErrorListener(OnErrorListener listener);
+    void setOnSeekCompleteListener(OnSeekCompleteListener listener);
 
-  void setOnInfoListener(OnInfoListener listener);
+    void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener);
 
-  /**
-   * @see android.media.MediaPlayer.OnPreparedListener
-   */
-  interface OnPreparedListener {
+    void setOnErrorListener(OnErrorListener listener);
 
-    void onPrepared(IMediaPlayer mp);
-  }
+    void setOnInfoListener(OnInfoListener listener);
 
-  /**
-   * @see android.media.MediaPlayer.OnCompletionListener
-   */
-  interface OnCompletionListener {
-
-    void onCompletion(IMediaPlayer mp);
-  }
-
-  /**
-   * @see android.media.MediaPlayer.OnBufferingUpdateListener
-   */
-  interface OnBufferingUpdateListener {
-
-    void onBufferingUpdate(IMediaPlayer mp, int percent);
-  }
-
-  /**
-   * @see android.media.MediaPlayer.OnSeekCompleteListener
-   */
-  interface OnSeekCompleteListener {
-
-    void onSeekComplete(IMediaPlayer mp);
-  }
-
-  interface OnVideoSizeChangedListener {
-
-    void onVideoSizeChanged(IMediaPlayer mp, int width, int height, int unappliedRotationDegrees,float pixelWidthHeightRatio);
-  }
-
-  /**
-   * @see android.media.MediaPlayer.OnErrorListener
-   */
-  interface OnErrorListener {
     /**
-     * @return True if the method handled the error, false if it didn't. Returning false, or not
-     * having an OnErrorListener at all, will cause the OnCompletionListener to be called.
+     * @see android.media.MediaPlayer.OnPreparedListener
      */
-    boolean onError(IMediaPlayer mp, int what, int extra, Exception e);
-  }
+    interface OnPreparedListener {
 
-  /**
-   * @see android.media.MediaPlayer.OnInfoListener
-   */
-  interface OnInfoListener {
+        void onPrepared(IMediaPlayer mp);
+    }
+
     /**
-     * @return True if the method handled the info, false if it didn't. Returning false, or not
-     * having an OnInfoListener at all, will cause the info to be discarded.
+     * @see android.media.MediaPlayer.OnCompletionListener
      */
-    boolean onInfo(IMediaPlayer mp, int what, int extra);
-  }
+    interface OnCompletionListener {
 
-  // ============================@Constants
-  //Do not change these values [from android.media.MediaPlayer]
+        void onCompletion(IMediaPlayer mp);
+    }
 
-  //ERROR
-  int MEDIA_ERROR_UNKNOWN = 1;
-  int MEDIA_ERROR_SERVER_DIED = 100;
-  int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;
-  int MEDIA_ERROR_IO = -1004;
-  int MEDIA_ERROR_MALFORMED = -1007;
-  int MEDIA_ERROR_UNSUPPORTED = -1010;
-  int MEDIA_ERROR_TIMED_OUT = -110;
+    /**
+     * @see android.media.MediaPlayer.OnBufferingUpdateListener
+     */
+    interface OnBufferingUpdateListener {
 
-  //INFO
-  int MEDIA_INFO_UNKNOWN = 1;
-  int MEDIA_INFO_STARTED_AS_NEXT = 2;
-  int MEDIA_INFO_VIDEO_RENDERING_START = 3;
-  int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;
-  int MEDIA_INFO_BUFFERING_START = 701;
-  int MEDIA_INFO_BUFFERING_END = 702;
-  int MEDIA_INFO_BAD_INTERLEAVING = 800;
-  int MEDIA_INFO_NOT_SEEKABLE = 801;
-  int MEDIA_INFO_METADATA_UPDATE = 802;
-  int MEDIA_INFO_EXTERNAL_METADATA_UPDATE = 803;
-  int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
-  int MEDIA_INFO_UNSUPPORTED_SUBTITLE = 901;
-  int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902;
+        void onBufferingUpdate(IMediaPlayer mp, int percent);
+    }
+
+    /**
+     * @see android.media.MediaPlayer.OnSeekCompleteListener
+     */
+    interface OnSeekCompleteListener {
+
+        void onSeekComplete(IMediaPlayer mp);
+    }
+
+    interface OnVideoSizeChangedListener {
+
+        void onVideoSizeChanged(IMediaPlayer mp, int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio);
+    }
+
+    /**
+     * @see android.media.MediaPlayer.OnErrorListener
+     */
+    interface OnErrorListener {
+        /**
+         * @return True if the method handled the error, false if it didn't. Returning false, or not
+         * having an OnErrorListener at all, will cause the OnCompletionListener to be called.
+         */
+        boolean onError(IMediaPlayer mp, int what, int extra, Exception e);
+    }
+
+    /**
+     * @see android.media.MediaPlayer.OnInfoListener
+     */
+    interface OnInfoListener {
+        /**
+         * @return True if the method handled the info, false if it didn't. Returning false, or not
+         * having an OnInfoListener at all, will cause the info to be discarded.
+         */
+        boolean onInfo(IMediaPlayer mp, int what, int extra);
+    }
+
+    // ============================@Constants
+    //Do not change these values [from android.media.MediaPlayer]
+
+    //ERROR
+    int MEDIA_ERROR_UNKNOWN = 1;
+    int MEDIA_ERROR_SERVER_DIED = 100;
+    int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;
+    int MEDIA_ERROR_IO = -1004;
+    int MEDIA_ERROR_MALFORMED = -1007;
+    int MEDIA_ERROR_UNSUPPORTED = -1010;
+    int MEDIA_ERROR_TIMED_OUT = -110;
+
+    //INFO
+    int MEDIA_INFO_UNKNOWN = 1;
+    int MEDIA_INFO_STARTED_AS_NEXT = 2;
+    int MEDIA_INFO_VIDEO_RENDERING_START = 3;
+    int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;
+    int MEDIA_INFO_BUFFERING_START = 701;
+    int MEDIA_INFO_BUFFERING_END = 702;
+    int MEDIA_INFO_BAD_INTERLEAVING = 800;
+    int MEDIA_INFO_NOT_SEEKABLE = 801;
+    int MEDIA_INFO_METADATA_UPDATE = 802;
+    int MEDIA_INFO_EXTERNAL_METADATA_UPDATE = 803;
+    int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
+    int MEDIA_INFO_UNSUPPORTED_SUBTITLE = 901;
+    int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902;
 }
