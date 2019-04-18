@@ -154,6 +154,8 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
             }
             // =========@has prepared@=========
             if (isPrepared(uri)) {
+                //added by fee 2019-04-18: 处理多次传相同的Url来播放时，此时也应该是想去播放
+                theWorkFlow = WORK_FLOW_PREPARED;
                 onPrepared();
                 return true;
             }
