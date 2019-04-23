@@ -17,7 +17,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        minSdkVersion 9
+        minSdkVersion 14
         targetSdkVersion 27
         versionCode 1010
         versionName "1.0.10"
