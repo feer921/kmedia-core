@@ -230,23 +230,23 @@ public abstract class AControlGroupView extends FrameLayout {
       return super.onScroll(e1, e2, distanceX, distanceY);
     }
 
-    @Override
-    public boolean onScrollLongitudinalLeft(MotionEvent e1, MotionEvent e2, MotionEvent e3,
-        float distanceX, float distanceY) {
-      if (!super.onScrollLongitudinalLeft(e1, e2, e3, distanceX, distanceY)) {
-        adjustsVolume((e3.getY() - e2.getY()) / getHeight(), isAdjustsShowTipsView = true);
-      }// (last Y - current Y) / height -> get increment
-      return true;
-    }
-
-    @Override
-    public boolean onScrollLongitudinalRight(MotionEvent e1, MotionEvent e2, MotionEvent e3,
-        float distanceX, float distanceY) {
-      if (!super.onScrollLongitudinalRight(e1, e2, e3, distanceX, distanceY)) {
-        adjustsVolume((e3.getY() - e2.getY()) / getHeight(), isAdjustsShowTipsView = true);
-      }// (last Y - current Y) / height -> get increment
-      return true;
-    }
+//    @Override
+//    public boolean onScrollLongitudinalLeft(MotionEvent e1, MotionEvent e2, MotionEvent e3,
+//        float distanceX, float distanceY) {
+//      if (!super.onScrollLongitudinalLeft(e1, e2, e3, distanceX, distanceY)) {
+//        adjustsVolume((e3.getY() - e2.getY()) / getHeight(), isAdjustsShowTipsView = true);
+//      }// (last Y - current Y) / height -> get increment
+//      return true;
+//    }
+//
+//    @Override
+//    public boolean onScrollLongitudinalRight(MotionEvent e1, MotionEvent e2, MotionEvent e3,
+//        float distanceX, float distanceY) {
+//      if (!super.onScrollLongitudinalRight(e1, e2, e3, distanceX, distanceY)) {
+//        adjustsVolume((e3.getY() - e2.getY()) / getHeight(), isAdjustsShowTipsView = true);
+//      }// (last Y - current Y) / height -> get increment
+//      return true;
+//    }
 
     @Override
     public boolean onScrollCrosswise(MotionEvent e1, MotionEvent e2, MotionEvent e3,
