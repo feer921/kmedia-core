@@ -347,6 +347,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
                 if (beforeStart()) {
                     return false;
                 }
+                Log.i(TAG, PLAYER_FLAG == null ? "" : PLAYER_FLAG + " -->start()");
                 internalPlayer.start();
                 //go update...
                 updatePlayProgress(UPDATE_PLAY_PROGRESS_CMD_GOON);
@@ -384,7 +385,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
 
     @Override
     public boolean pause() {
-        if (theWorkFlow != WORK_FLOW_PAUSED_ACTIVE) {
+        if (theWorkFlow != WORK_FLOW_PAUSED_ACTIVE && theWorkFlow != WORK_FLOW_PSUSED_INNER_RESULT_IN) {
             theWorkFlow = WORK_FLOW_PAUSED_AUTO;
         }
         shouldAutoPlayWhenSeekComplete = false;
@@ -402,6 +403,10 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
         return false;
     }
 
+    private boolean innerResultInPause() {
+        theWorkFlow = WORK_FLOW_PSUSED_INNER_RESULT_IN;
+        return pause();
+    }
     /**
      * 暂停(是否主动暂停)
      *
@@ -1107,13 +1112,13 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
             // ============================@Processing@============================
             if (posUnitLoopMode == -8) {
                 // =========@infinity loop[-8]@=========
-                pause();
+                innerResultInPause();
                 methodAgent.sendEmptyMessageDelayed(31, posUnitLoopInterval * 1000);
                 return 1;//enable(processing[infinity loop])
             } else if (posUnitLoopMode > 0) {
                 // =========@specified loop[>0]@=========
                 if (posUnitLoopedCount < posUnitLoopMode) {
-                    pause();
+                    innerResultInPause();
                     methodAgent.sendEmptyMessageDelayed(311, posUnitLoopInterval * 1000);
                     return 1;//enable(processing[specified loop])
                 } else {
@@ -1129,7 +1134,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
                     if (posUnitLoopIndexList != null && posUnitLoopIndexList.size() > 0 &&
                             currentPosUnitIndex >= posUnitLoopIndexList.get(posUnitLoopIndexList.size() - 1)) {
                         if (posUnitLoopInterval > 0) {
-                            pause();
+                            innerResultInPause();
                             Message message = methodAgent.obtainMessage(3111);
                             message.arg1 = posUnitLoopIndexList.get(0);
                             methodAgent.sendMessageDelayed(message, posUnitLoopInterval * 1000);
@@ -1149,7 +1154,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
                 if (posUnitLoopIndexList != null && posUnitLoopIndexList.size() > 0 &&
                         currentPosUnitIndex >= posUnitLoopIndexList.get(posUnitLoopIndexList.size() - 1)) {
                     if (posUnitLoopInterval > 0) {
-                        pause();
+                        innerResultInPause();
                         Message message = methodAgent.obtainMessage(3111);
                         message.arg1 = posUnitLoopIndexList.get(0);
                         methodAgent.sendMessageDelayed(message, posUnitLoopInterval * 1000);
@@ -1159,7 +1164,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
                     return 1;//enable(processing[loop index list])
                 } else {
                     if (posUnitLoopInterval > 0) {
-                        pause();
+                        innerResultInPause();
                         methodAgent.sendEmptyMessageDelayed(1, posUnitLoopInterval * 1000);//start()
                     }
                     return 2;//enable(finish[not loop])
@@ -1349,13 +1354,13 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
             // ============================@Processing@============================
             if (abLoopMode == -8) {
                 // =========@infinity loop[-8]@=========
-                pause();
+                innerResultInPause();
                 methodAgent.sendEmptyMessageDelayed(32, abInterval * 1000);
                 return 1;//enable(processing[infinity loop])
             } else if (abLoopMode > 0) {
                 // =========@specified loop[>0]@=========
                 if (abLoopedCount < abLoopMode) {
-                    pause();
+                    innerResultInPause();
                     methodAgent.sendEmptyMessageDelayed(322, abInterval * 1000);
                     return 1;//enable(processing[specified loop])
                 } else {
@@ -1366,7 +1371,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
                         clearAB();
                     }
                     if (processFrom != 2) {//!process from onCompletion().
-                        pause();
+                        innerResultInPause();
                     }
                     return 2;//enable(finish[specified loop])
                 }
@@ -1377,7 +1382,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
                     clearAB();
                 }
                 if (processFrom != 2) {//!process from onCompletion().
-                    pause();
+                    innerResultInPause();
                 }
                 return 2;//enable(finish[not loop])
             }
@@ -1484,7 +1489,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
         if (currentAudioFocusState == AudioManager.AUDIOFOCUS_LOSS
                 ||
                 currentAudioFocusState == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {//音频焦点的失去和暂时失去，则暂停
-            pause();
+            innerResultInPause();
             return true;
         }
         else {//AUDIOFOCUS_GAIN, AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
@@ -1604,7 +1609,7 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
             if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
                 L.d(TAG, "Headphones disconnected.");
                 if (isPlaying()) {
-                    pause();
+                    innerResultInPause();
                 }
             }
         }

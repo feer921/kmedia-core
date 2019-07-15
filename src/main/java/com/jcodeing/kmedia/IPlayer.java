@@ -87,6 +87,8 @@ public interface IPlayer<P extends IPlayer> extends IPlayerBase {
      */
     int WORK_FLOW_STOP = WORK_FLOW_PLAY_AUTO + 1;
 
+    int WORK_FLOW_PSUSED_INNER_RESULT_IN = WORK_FLOW_STOP + 1;
+
     /**
      * Get a internal mediaPlayer
      * <pre>
