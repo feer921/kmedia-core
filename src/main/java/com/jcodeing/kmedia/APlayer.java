@@ -770,13 +770,15 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
     // =========@Extend@=========
     // Must be kept in sync with IPlayer.Listener
     protected boolean onIntent(Intent intent) {
+        boolean isSomeOneListenerHandled = false;
         if (intent != null) {
             for (Listener listener : listeners) {
-                listener.onIntent(intent);
+                if (listener.onIntent(intent)) {
+                    isSomeOneListenerHandled = true;
+                }
             }
-            return true;
         }
-        return false;
+        return isSomeOneListenerHandled;
     }
 
     protected boolean onPlayProgress(long position, long duration) {
@@ -1609,7 +1611,9 @@ public abstract class APlayer<P extends APlayer> implements IPlayer<P>, IPlayerB
             if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
                 L.d(TAG, "Headphones disconnected.");
                 if (isPlaying()) {
-                    innerResultInPause();
+                    if (!onIntent(intent)) {//监听者们是否处理了，如果没有处理，则本类处理
+                        innerResultInPause();
+                    }
                 }
             }
         }
