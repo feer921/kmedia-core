@@ -22,7 +22,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;

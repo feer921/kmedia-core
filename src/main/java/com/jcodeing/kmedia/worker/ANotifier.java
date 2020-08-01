@@ -21,14 +21,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompat.Builder;
+
 import com.jcodeing.kmedia.R;
 import com.jcodeing.kmedia.assist.NotificationMgrHelper;
 import com.jcodeing.kmedia.definition.IMediaItem;
 import com.jcodeing.kmedia.service.PlayerService;
 import com.jcodeing.kmedia.utils.L;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationCompat.Builder;
 
 public abstract class ANotifier extends BroadcastReceiver {
 
@@ -223,7 +225,7 @@ public abstract class ANotifier extends BroadcastReceiver {
     builder
         .setSmallIcon(R.drawable.k_ic_media)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle());
+        .setStyle(new androidx.media.app.NotificationCompat.MediaStyle());
     setSimpleMediaInfo(builder, mediaItem);
     return builder;
   }

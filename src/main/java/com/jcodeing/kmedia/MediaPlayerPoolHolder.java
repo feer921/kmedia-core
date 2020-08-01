@@ -41,6 +41,12 @@ public class MediaPlayerPoolHolder {
      */
     private boolean isThePlayerAutoPlayEmptyMediaWhenOver = true;
 
+    /**
+     * 当为 播放器池模式时，是否需要在播放器池里去 本次播放的音频资源相同的播放器
+     * def:true
+     */
+    private boolean isNeedFindSamePlayerInPool = true;
+
     public MediaPlayerPoolHolder withMediaStreamType(int mediaStreamType) {
         this.theStreamType = mediaStreamType;
         return this;
@@ -58,6 +64,10 @@ public class MediaPlayerPoolHolder {
         return this;
     }
 
+    public MediaPlayerPoolHolder withFindSamePlayer(boolean isNeedFindSamePlayerInPool) {
+        this.isNeedFindSamePlayerInPool = isNeedFindSamePlayerInPool;
+        return this;
+    }
     public MediaPlayerPoolHolder withDebugEable(boolean enableDebug) {
         this.isDebug = enableDebug;
         return this;
@@ -156,16 +166,18 @@ public class MediaPlayerPoolHolder {
         if (playerPool != null) {
             WorkStatePlayer theWillPlayPlayer = null;
             if (!Assert.isEmpty(toPlayMediaFilePath)) {
-                //先找播放相同媒体文件的播放器
-                for (WorkStatePlayer workStatePlayer : playerPool) {
-                    String thePlayFilePath = workStatePlayer.getCurPlayMediaPath();
-                    log(TAG, "-->findFreePlayerOrSamePlayer() thePlayFilePath = " + thePlayFilePath + " toPlayMediaFilePath = " + toPlayMediaFilePath);
-                    if (toPlayMediaFilePath.equals(thePlayFilePath)) {
-                        theWillPlayPlayer = workStatePlayer;
-                        break;
+                if (isNeedFindSamePlayerInPool) {
+                    //先找播放相同媒体文件的播放器
+                    for (WorkStatePlayer workStatePlayer : playerPool) {
+                        String thePlayFilePath = workStatePlayer.getCurPlayMediaPath();
+                        log(TAG, "-->findFreePlayerOrSamePlayer() thePlayFilePath = " + thePlayFilePath + " toPlayMediaFilePath = " + toPlayMediaFilePath);
+                        if (toPlayMediaFilePath.equals(thePlayFilePath)) {
+                            theWillPlayPlayer = workStatePlayer;
+                            break;
+                        }
                     }
                 }
-                log(TAG, "-->findFreePlayerOrSamePlayer() the same player: " + theWillPlayPlayer);
+                log(TAG, "-->findFreePlayerOrSamePlayer() the same player: " + theWillPlayPlayer + " isNeedFindSamePlayerInPool = " + isNeedFindSamePlayerInPool);
                 if (theWillPlayPlayer == null) {//没有找到正在播放相同媒体资源的播放器
                     for (WorkStatePlayer workStatePlayer : playerPool) {//则去找是否有空闲的播放器
                         if (!workStatePlayer.isWorking()) {
@@ -295,4 +307,5 @@ public class MediaPlayerPoolHolder {
             Log.i(tag, logInfo);
         }
     }
+
 }

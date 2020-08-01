@@ -18,7 +18,6 @@ package com.jcodeing.kmedia;
 import android.Manifest.permission;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.RequiresPermission;
 
 import com.jcodeing.kmedia.assist.AudioMgrHelper;
 import com.jcodeing.kmedia.assist.C;
@@ -27,6 +26,8 @@ import com.jcodeing.kmedia.definition.IMediaQueue;
 import com.jcodeing.kmedia.definition.IPositionUnitList;
 
 import java.util.ArrayList;
+
+import androidx.annotation.RequiresPermission;
 
 /**
  * Interface Player

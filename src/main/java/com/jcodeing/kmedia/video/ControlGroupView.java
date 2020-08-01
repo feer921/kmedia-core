@@ -19,8 +19,10 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.jcodeing.kmedia.IPlayer;
 import com.jcodeing.kmedia.IPlayerBase;
 
@@ -133,11 +135,18 @@ public class ControlGroupView extends AControlGroupView {
   }
 
   private void updatePlayPauseButton() {
+    updatePlayPauseButton(true);
+  }
+
+  private void updatePlayPauseButton(boolean carePlayControllerVisible) {
     if (!isAttachedToWindow || !isPlayable()) {
       return;
     }
     boolean playing = player.isPlaying();
-    if (isVisibleByPlayController()) {
+    boolean isVisibleByPlayController = isVisibleByPlayController();
+    Log.e("info", "--->updatePlayPauseButton() isVisibleByPlayController = " + isVisibleByPlayController);
+    boolean willToUpdate = !carePlayControllerVisible || isVisibleByPlayController;
+    if (willToUpdate) {
       boolean requestPlayPauseFocus = false;
       if (playView != null) {
         requestPlayPauseFocus = playing && playView.isFocused();
@@ -145,7 +154,7 @@ public class ControlGroupView extends AControlGroupView {
       }
       if (pauseView != null) {
         requestPlayPauseFocus |= //Both sides to false is false
-            !playing && pauseView.isFocused();
+                !playing && pauseView.isFocused();
         pauseView.setVisibility(!playing ? GONE : VISIBLE);
       }
       if (requestPlayPauseFocus) {
@@ -153,7 +162,6 @@ public class ControlGroupView extends AControlGroupView {
       }
     }
   }
-
   private void updateNavigation() {
     if (!isVisibleByPlayController() || !isAttachedToWindow) {
       return;
@@ -231,6 +239,7 @@ public class ControlGroupView extends AControlGroupView {
 
     @Override
     public void onStateChanged(int playbackState) {
+      super.onStateChanged(playbackState);
       if (playbackState == IPlayerBase.STATE_READY) {
         if (!player.isPlaying()) {
           show(true, false);//not playing, show with not hide after timeout
@@ -241,6 +250,13 @@ public class ControlGroupView extends AControlGroupView {
       updatePlayPauseButton();
       updateProgressView(-1, -1);
       showBufferingView(playbackState == IPlayer.STATE_BUFFERING);
+    }
+
+    @Override
+    public int onCompletion() {
+      updatePlayPauseButton(false);
+      updateProgressView(-1,null,-1,null,false);
+      return super.onCompletion();
     }
 
     @Override

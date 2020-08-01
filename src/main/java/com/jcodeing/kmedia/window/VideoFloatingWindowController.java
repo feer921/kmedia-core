@@ -16,11 +16,13 @@
 package com.jcodeing.kmedia.window;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.View.OnClickListener;
+
 import com.jcodeing.kmedia.IPlayer;
 import com.jcodeing.kmedia.R;
+
+import androidx.annotation.NonNull;
 
 public class VideoFloatingWindowController extends FloatingWindowController implements
     OnClickListener {

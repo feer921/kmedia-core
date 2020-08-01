@@ -18,7 +18,7 @@ package com.jcodeing.kmedia.window;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.Build;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;

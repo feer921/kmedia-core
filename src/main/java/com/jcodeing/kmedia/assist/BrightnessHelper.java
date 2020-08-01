@@ -15,7 +15,7 @@
  */
 package com.jcodeing.kmedia.assist;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import com.jcodeing.kmedia.utils.Assert;

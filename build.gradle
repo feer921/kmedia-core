@@ -14,11 +14,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 29
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 29
         versionCode 1010
         versionName "1.0.10"
         vectorDrawables.useSupportLibrary = true
@@ -32,13 +32,10 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:support-media-compat:27.1.1'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.media:media:1.1.0'
 }
 
 repositories {
-    maven {
-        url 'https://maven.google.com/'
-        name 'Google'
-    }
+    google()
 }

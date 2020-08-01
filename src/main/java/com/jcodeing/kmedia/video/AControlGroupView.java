@@ -18,8 +18,9 @@ package com.jcodeing.kmedia.video;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.SystemClock;
-import android.support.annotation.DrawableRes;
+import androidx.annotation.DrawableRes;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -92,6 +93,9 @@ public abstract class AControlGroupView extends FrameLayout {
 
   protected void init() {
     componentListener = initGetComponentListener();
+    if (componentListener != null) {
+      componentListener.LOG_DEBUG = true;
+    }
   }
 
   @Override
@@ -781,13 +785,21 @@ public abstract class AControlGroupView extends FrameLayout {
     updateProgressView(position, null, duration, null);
   }
 
-  /**
-   * @param positionCP <ul> <li>{@link C.PARAM#UNSET} <li>{@link C.PARAM#FORCE} <ul/>
-   * @param durationCP <ul> <li>{@link C.PARAM#UNSET} <ul/>
-   */
   protected void updateProgressView(long position, C.PARAM positionCP,
-      long duration, C.PARAM durationCP) {
-    if (!isVisibleByPlayController() || !isAttachedToWindow) {
+                                    long duration, C.PARAM durationCP, boolean carePlayControllerVisible) {
+    boolean isVisibleByPlayController = isVisibleByPlayController();
+    Log.i("info", "-->updateProgressView() isVisibleByPlayController = " + isVisibleByPlayController
+            + " position = " + position
+    );
+    boolean willUpdate = false;
+    if (!carePlayControllerVisible) {
+      willUpdate = true;
+    }else {
+      if (isVisibleByPlayController && isAttachedToWindow) {
+        willUpdate = true;
+      }
+    }
+    if (!willUpdate) {
       return;
     }
     if (durationCP != C.PARAM.UNSET && durationTv != null) {
@@ -810,7 +822,9 @@ public abstract class AControlGroupView extends FrameLayout {
         }
       }
       if (positionTv != null) {
-        positionTv.setText(TimeProgress.stringForTime(position));
+        String timeStr = TimeProgress.stringForTime(position);
+        Log.i("info", "-->updateProgressView() timeStr = " + timeStr);
+        positionTv.setText(timeStr);
       }
       int p = progressValue(position);
       if (progressBar != null) {
@@ -820,6 +834,14 @@ public abstract class AControlGroupView extends FrameLayout {
         progressAny.setProgress(p);
       }
     }
+  }
+  /**
+   * @param positionCP <ul> <li>{@link C.PARAM#UNSET} <li>{@link C.PARAM#FORCE} <ul/>
+   * @param durationCP <ul> <li>{@link C.PARAM#UNSET} <ul/>
+   */
+  protected void updateProgressView(long position, C.PARAM positionCP,
+      long duration, C.PARAM durationCP) {
+    updateProgressView(position, positionCP, duration, durationCP, true);
   }
 
   protected int progressValue(long position) {
@@ -965,7 +987,9 @@ public abstract class AControlGroupView extends FrameLayout {
       if (fromUser) {
         long position = positionValue(progress);
         if (positionTv != null) {
-          positionTv.setText(TimeProgress.stringForTime(position));
+          String timeStr = TimeProgress.stringForTime(position);
+          positionTv.setText(timeStr);
+//          Log.i("info", "-->onProgressChanged() from user timeStr: " + timeStr);
         }
         if (player != null && !dragging) {
           seekTo(position);
@@ -994,7 +1018,9 @@ public abstract class AControlGroupView extends FrameLayout {
       if (fromUser) {
         long position = positionValue(progress);
         if (positionTv != null) {
-          positionTv.setText(TimeProgress.stringForTime(position));
+          String timeStr = TimeProgress.stringForTime(position);
+          positionTv.setText(timeStr);
+          Log.i("info", "--> onProgressChanged() ProgressAny timeStr = " + timeStr);
         }
         if (player != null && !dragging) {
           seekTo(position);
